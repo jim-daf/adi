@@ -234,6 +234,7 @@ const EcoData = (() => {
         {
             id: 1,
             name: 'Classic Beef Bolognese',
+            image: 'https://images.unsplash.com/photo-1622973536968-3ead9e780960?w=600&h=400&fit=crop',
             ingredients: [
                 { name: 'beef', amount: 500, unit: 'g' },
                 { name: 'tomatoes', amount: 400, unit: 'g' },
@@ -250,6 +251,7 @@ const EcoData = (() => {
         {
             id: 2,
             name: 'Chicken Stir-Fry',
+            image: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=600&h=400&fit=crop',
             ingredients: [
                 { name: 'chicken', amount: 400, unit: 'g' },
                 { name: 'rice', amount: 300, unit: 'g' },
@@ -267,6 +269,7 @@ const EcoData = (() => {
         {
             id: 3,
             name: 'Lamb Curry',
+            image: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=600&h=400&fit=crop',
             ingredients: [
                 { name: 'lamb', amount: 500, unit: 'g' },
                 { name: 'onions', amount: 200, unit: 'g' },
@@ -283,6 +286,7 @@ const EcoData = (() => {
         {
             id: 4,
             name: 'Salmon with Buttered Vegetables',
+            image: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=600&h=400&fit=crop',
             ingredients: [
                 { name: 'salmon', amount: 400, unit: 'g' },
                 { name: 'butter', amount: 40, unit: 'g' },
@@ -298,6 +302,7 @@ const EcoData = (() => {
         {
             id: 5,
             name: 'Bacon Cheeseburger',
+            image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&h=400&fit=crop',
             ingredients: [
                 { name: 'beef', amount: 400, unit: 'g' },
                 { name: 'bacon', amount: 100, unit: 'g' },
@@ -314,6 +319,7 @@ const EcoData = (() => {
         {
             id: 6,
             name: 'Vegetable Lentil Soup',
+            image: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=600&h=400&fit=crop',
             ingredients: [
                 { name: 'lentils', amount: 300, unit: 'g' },
                 { name: 'carrots', amount: 200, unit: 'g' },

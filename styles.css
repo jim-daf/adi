@@ -154,6 +154,24 @@ h3 {
     font-weight: 600;
 }
 
+.nav-link-recipe {
+    border: 1.5px dashed var(--green-400);
+    background: var(--green-50);
+    color: var(--green-700);
+    font-size: 0.82rem;
+}
+
+.nav-link-recipe:hover {
+    background: var(--green-100);
+    border-color: var(--green-600);
+}
+
+.nav-link-recipe.active {
+    border-style: solid;
+    border-color: var(--green-600);
+    background: var(--green-100);
+}
+
 .streak-badge {
     background: var(--green-100);
     padding: 0.35rem 0.75rem;
@@ -283,19 +301,45 @@ h3 {
 .recipe-card {
     background: white;
     border-radius: var(--radius-lg);
-    padding: 1.5rem;
     box-shadow: var(--shadow-sm);
     border: 1px solid var(--gray-200);
     cursor: pointer;
     transition: var(--transition);
     position: relative;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .recipe-card:hover {
     box-shadow: var(--shadow-lg);
     transform: translateY(-2px);
     border-color: var(--green-300);
+}
+
+.recipe-card-image {
+    width: 100%;
+    height: 180px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.recipe-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.recipe-card:hover .recipe-card-image img {
+    transform: scale(1.05);
+}
+
+.recipe-card-body {
+    padding: 1.25rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .recipe-card-header {
@@ -337,14 +381,15 @@ h3 {
 }
 
 .recipe-card-ingredients .highlight-ingredient {
-    background: #fef3c7;
+    background: #d1fae5;
     padding: 0.1rem 0.35rem;
     border-radius: 3px;
     font-weight: 500;
 }
 
 .recipe-card-footer {
-    margin-top: 1rem;
+    margin-top: auto;
+    padding-top: 1rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -353,6 +398,122 @@ h3 {
 .co2-mini {
     font-size: 0.85rem;
     color: var(--gray-500);
+}
+
+/* ---------- Save Recipe Button ---------- */
+.btn-save-recipe {
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.75rem 1.25rem;
+    background: var(--green-600);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+}
+
+.btn-save-recipe:hover {
+    background: var(--green-700);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-save-recipe:active {
+    transform: scale(0.98);
+}
+
+/* ---------- Saved Recipes View ---------- */
+.saved-recipes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.25rem;
+}
+
+.saved-empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--gray-500);
+    grid-column: 1 / -1;
+}
+
+.saved-recipe-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--green-200);
+    transition: var(--transition);
+}
+
+.saved-recipe-card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--green-400);
+}
+
+.saved-recipe-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+}
+
+.saved-recipe-header h3 {
+    font-size: 1.05rem;
+    color: var(--gray-800);
+}
+
+.saved-recipe-meta {
+    display: flex;
+    gap: 1rem;
+    color: var(--gray-500);
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.saved-recipe-ingredients {
+    font-size: 0.85rem;
+    color: var(--gray-600);
+    line-height: 1.5;
+    margin-bottom: 0.75rem;
+}
+
+.saved-recipe-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.saved-recipe-date {
+    font-size: 0.78rem;
+    color: var(--gray-400);
+}
+
+.saved-recipe-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-danger-outline {
+    border: 1px solid var(--red-500);
+    color: var(--red-500);
+    background: transparent;
+    border-radius: var(--radius-md);
+    padding: 0.3rem 0.6rem;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.8rem;
+}
+
+.btn-danger-outline:hover {
+    background: var(--red-500);
+    color: white;
 }
 
 /* ---------- Custom Recipe Card ---------- */

@@ -37,6 +37,7 @@ const App = (() => {
         dismissedSuggestions: {}, // track user fatigue per ingredient
         userMood: 'neutral', // neutral, receptive, annoyed
         suggestionCount: 0,
+        savedRecipes: [], // saved/modified recipes
     };
 
     // ===== Initialization =====
@@ -45,6 +46,7 @@ const App = (() => {
         setupNavigation();
         setupEventListeners();
         renderRecipeGrid();
+        renderSavedRecipesView();
         renderImpactView();
         updateStreakBadge();
         checkStreak();
@@ -129,6 +131,9 @@ const App = (() => {
         // Back button
         document.getElementById('backToRecipes').addEventListener('click', () => {
             switchView('recipes');
+            hideRecipeNavLink();
+            state.currentRecipe = null;
+            state.currentIngredients = [];
         });
 
         // Analyze custom recipe
@@ -157,6 +162,9 @@ const App = (() => {
                 sendMainChat();
             });
         });
+
+        // Save recipe
+        document.getElementById('saveRecipeBtn').addEventListener('click', saveCurrentRecipe);
 
         // Settings
         document.getElementById('saveApiKey').addEventListener('click', saveApiSettings);
@@ -190,19 +198,21 @@ const App = (() => {
             const card = document.createElement('div');
             card.className = 'recipe-card';
             card.innerHTML = `
-                <div class="recipe-card-header">
-                    <h3>${recipe.name}</h3>
-                    <span class="carbon-badge" style="background:${rating.color}">${rating.grade}</span>
-                </div>
-                <div class="recipe-card-meta">
-                    <span>🍽️ ${recipe.servings} servings</span>
-                    <span>⏱️ ${recipe.time}</span>
-                    <span>🌍 ${recipe.cuisine}</span>
-                </div>
-                <div class="recipe-card-ingredients">${ingredientNames}</div>
-                <div class="recipe-card-footer">
-                    <span class="co2-mini">🌿 ${perServing.toFixed(2)} kg CO₂e/serving</span>
-                    ${substitutable.length > 0 ? `<span class="text-green text-sm font-bold">${substitutable.length} swap${substitutable.length > 1 ? 's' : ''} available</span>` : '<span class="text-green text-sm">Already eco-friendly!</span>'}
+                ${recipe.image ? `<div class="recipe-card-image"><img src="${recipe.image}" alt="${recipe.name}" loading="lazy"></div>` : ''}
+                <div class="recipe-card-body">
+                    <div class="recipe-card-header">
+                        <h3>${recipe.name}</h3>
+                    </div>
+                    <div class="recipe-card-meta">
+                        <span>🍽️ ${recipe.servings} servings</span>
+                        <span>⏱️ ${recipe.time}</span>
+                        <span>🌍 ${recipe.cuisine}</span>
+                    </div>
+                    <div class="recipe-card-ingredients">${ingredientNames}</div>
+                    <div class="recipe-card-footer">
+                        <span class="co2-mini">🌿 ${perServing.toFixed(2)} kg CO₂e/serving</span>
+                        ${substitutable.length > 0 ? `<span class="text-green text-sm font-bold">${substitutable.length} swap${substitutable.length > 1 ? 's' : ''} available</span>` : '<span class="text-green text-sm">Already eco-friendly!</span>'}
+                    </div>
                 </div>
             `;
             card.addEventListener('click', () => openRecipeDetail(recipe));
@@ -219,6 +229,23 @@ const App = (() => {
 
         renderDetailView();
         switchView('detail');
+        showRecipeNavLink(recipe.name);
+    }
+
+    function showRecipeNavLink(name) {
+        const link = document.getElementById('navRecipeLink');
+        const nameSpan = document.getElementById('navRecipeName');
+        if (link && nameSpan) {
+            // Truncate long names for the nav
+            nameSpan.textContent = name.length > 18 ? name.substring(0, 18) + '…' : name;
+            link.style.display = '';
+            link.title = name;
+        }
+    }
+
+    function hideRecipeNavLink() {
+        const link = document.getElementById('navRecipeLink');
+        if (link) link.style.display = 'none';
     }
 
     function renderDetailView() {
@@ -545,6 +572,100 @@ const App = (() => {
         });
     }
 
+    // ===== Saved Recipes =====
+    function saveCurrentRecipe() {
+        if (!state.currentRecipe) {
+            showToast('No recipe is currently open.', 'warning');
+            return;
+        }
+
+        const recipe = {
+            id: Date.now(),
+            name: state.currentRecipe.name,
+            ingredients: JSON.parse(JSON.stringify(state.currentIngredients)),
+            servings: state.currentRecipe.servings,
+            cuisine: state.currentRecipe.cuisine || 'Custom',
+            time: state.currentRecipe.time || 'N/A',
+            savedAt: new Date().toISOString(),
+        };
+
+        state.savedRecipes.push(recipe);
+        saveState();
+        renderSavedRecipesView();
+        showToast(`"${recipe.name}" saved to My Recipes!`, 'success');
+    }
+
+    function renderSavedRecipesView() {
+        const grid = document.getElementById('savedRecipesGrid');
+        const empty = document.getElementById('savedEmpty');
+        if (!grid) return;
+
+        // Clear previous cards (keep the empty placeholder)
+        grid.querySelectorAll('.saved-recipe-card').forEach(c => c.remove());
+
+        if (state.savedRecipes.length === 0) {
+            if (empty) empty.style.display = '';
+            return;
+        }
+        if (empty) empty.style.display = 'none';
+
+        state.savedRecipes.forEach((recipe, idx) => {
+            const totalCO2 = EcoData.calculateRecipeCO2(recipe.ingredients);
+            const perServing = totalCO2 / recipe.servings;
+            const rating = EcoData.getCarbonRating(perServing);
+            const savedDate = new Date(recipe.savedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+            const card = document.createElement('div');
+            card.className = 'saved-recipe-card';
+            card.innerHTML = `
+                <div class="saved-recipe-header">
+                    <h3>${recipe.name}</h3>
+                    <span class="carbon-badge" style="background:${rating.color}">${rating.grade}</span>
+                </div>
+                <div class="saved-recipe-meta">
+                    <span>🍽️ ${recipe.servings} servings</span>
+                    <span>🌍 ${recipe.cuisine}</span>
+                    <span>🌿 ${perServing.toFixed(2)} kg CO₂e/serving</span>
+                </div>
+                <div class="saved-recipe-ingredients">
+                    ${recipe.ingredients.map(i => `${i.amount}${i.unit} ${i.name}`).join(', ')}
+                </div>
+                <div class="saved-recipe-footer">
+                    <span class="saved-recipe-date">Saved ${savedDate}</span>
+                    <div class="saved-recipe-actions">
+                        <button class="btn btn-sm btn-outline" onclick="App.openSavedRecipe(${idx})">Open</button>
+                        <button class="btn btn-sm btn-danger-outline" onclick="App.deleteSavedRecipe(${idx})">🗑️</button>
+                    </div>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    function openSavedRecipe(index) {
+        const recipe = state.savedRecipes[index];
+        if (!recipe) return;
+        openRecipeDetail({
+            id: recipe.id,
+            name: recipe.name,
+            ingredients: JSON.parse(JSON.stringify(recipe.ingredients)),
+            servings: recipe.servings,
+            cuisine: recipe.cuisine,
+            time: recipe.time,
+        });
+    }
+
+    function deleteSavedRecipe(index) {
+        const recipe = state.savedRecipes[index];
+        if (!recipe) return;
+        if (confirm(`Delete "${recipe.name}" from your saved recipes?`)) {
+            state.savedRecipes.splice(index, 1);
+            saveState();
+            renderSavedRecipesView();
+            showToast('Recipe deleted.', 'info');
+        }
+    }
+
     // ===== Custom Recipe Analysis =====
     function analyzeCustomRecipe() {
         const name = document.getElementById('customRecipeName').value.trim();
@@ -624,7 +745,7 @@ When suggesting alternatives:
 - Offer multiple options when possible
 - If the user declines, gracefully accept and move on
 
-Keep responses concise (aim for 100-200 words), warm, and helpful. Use emojis sparingly but appropriately. Format with markdown (bold, lists) for readability.`;
+Keep responses concise, warm, and helpful. Use emojis sparingly but appropriately. Format with markdown (bold, lists) for readability.`;
 
     async function callLLM(messages) {
         if (!state.ollamaConnected) {
@@ -952,11 +1073,10 @@ Keep responses concise (aim for 100-200 words), warm, and helpful. Use emojis sp
         init,
         acceptSuggestion,
         declineSuggestion,
+        openSavedRecipe,
+        deleteSavedRecipe,
     };
 })();
 
 // Initialize on load
 document.addEventListener('DOMContentLoaded', App.init);
-
-
-
